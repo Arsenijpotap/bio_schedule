@@ -1,0 +1,88 @@
+* { box-sizing: border-box; }
+
+:root {
+  --tg-bg: #ffffff;
+  --tg-text: #111111;
+  --tg-hint: #7d7d83;
+  --tg-secondary: #f0f0f2;
+  --tg-button: #2481cc;
+  --tg-button-text: #ffffff;
+  --tg-link: #2481cc;
+  --tg-card: #f6f6f8;
+}
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--tg-bg);
+  color: var(--tg-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+
+.app {
+  min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.container {
+  width: min(680px, 100%);
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.card {
+  background: var(--tg-card);
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.input, .select {
+  width: 100%;
+  border: 0;
+  border-radius: 13px;
+  padding: 14px;
+  background: var(--tg-secondary);
+  color: var(--tg-text);
+  outline: none;
+}
+
+.input:focus, .select:focus {
+  box-shadow: 0 0 0 2px var(--tg-button);
+}
+
+.primary {
+  border: 0;
+  border-radius: 13px;
+  padding: 14px 18px;
+  background: var(--tg-button);
+  color: var(--tg-button-text);
+  font-weight: 700;
+  width: 100%;
+}
+
+.secondary {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 13px;
+  background: var(--tg-secondary);
+  color: var(--tg-text);
+}
+
+.hint { color: var(--tg-hint); }
+.link { color: var(--tg-link); }
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --tg-bg: #18222d;
+    --tg-text: #ffffff;
+    --tg-hint: #9aa4ad;
+    --tg-secondary: #22303d;
+    --tg-button: #2aabee;
+    --tg-button-text: #ffffff;
+    --tg-link: #64b5ef;
+    --tg-card: #202f3d;
+  }
+}
