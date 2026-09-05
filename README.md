@@ -84,3 +84,12 @@ The parser uses a tolerant HTML/table strategy because the source page can chang
 Never put `DATABASE_URL`, `POSTGRES_PASSWORD`, or `BOT_TOKEN` in client code.
 
 If a database password has been shared publicly, rotate it in Neon before deploying.
+
+## Vercel troubleshooting
+
+If the build says `DATABASE_URL is not configured`, add `DATABASE_URL` under:
+Vercel → Project → Settings → Environment Variables
+
+Enable it for Production, Preview, and Development as needed, then redeploy.
+The database module intentionally does not read `DATABASE_URL` during Next.js build time;
+it creates the Neon client only when an API request executes.

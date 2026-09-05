@@ -1,7 +1,8 @@
-import { sql } from "@/lib/db";
+import { getDb } from "@/lib/db";
 import type { Subgroup, UserSettings } from "@/types";
 
 export async function findUser(telegramId: string) {
+  const sql = getDb();
   const rows = await sql`
     SELECT telegram_id, course, group_name, subgroup
     FROM users
@@ -16,6 +17,7 @@ export async function upsertUser(
   settings: UserSettings,
   profile?: { username?: string; first_name?: string; last_name?: string }
 ) {
+  const sql = getDb();
   const rows = await sql`
     INSERT INTO users (
       telegram_id, username, first_name, last_name,
@@ -45,6 +47,7 @@ export async function upsertUser(
 }
 
 export async function getCachedSchedule(course: number, weekDate: string) {
+  const sql = getDb();
   const rows = await sql`
     SELECT data, created_at
     FROM schedule_cache
@@ -59,6 +62,7 @@ export async function saveCachedSchedule(
   weekDate: string,
   data: unknown
 ) {
+  const sql = getDb();
   await sql`
     INSERT INTO schedule_cache(course, week_date, data)
     VALUES (${course}, ${weekDate}, ${JSON.stringify(data)})
