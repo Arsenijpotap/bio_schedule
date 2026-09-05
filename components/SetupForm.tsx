@@ -1,11 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getTelegramInitData } from "@/components/TelegramInit";
 import type { Subgroup } from "@/types";
-
-function initData() {
-  return window.Telegram?.WebApp?.initData ?? "";
-}
 
 export default function SetupForm({ onSaved }: { onSaved: () => void }) {
   const [course, setCourse] = useState("1");
@@ -21,8 +18,12 @@ export default function SetupForm({ onSaved }: { onSaved: () => void }) {
       setLoadingGroups(true);
       try {
         const weekDate = monday(new Date());
+        const init = await getTelegramInitData();
         const res = await fetch(`/api/groups?course=${course}&week_date=${weekDate}`, {
-          headers: { "x-telegram-init-data": initData() }
+          headers: {
+            "x-telegram-init-data": init,
+            "Authorization": init ? `tma ${init}` : ""
+          }
         });
         const data = await res.json();
         setGroups(data.groups ?? []);
@@ -42,7 +43,7 @@ export default function SetupForm({ onSaved }: { onSaved: () => void }) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-telegram-init-data": initData()
+        "x-telegram-init-data": await getTelegramInitData()
       },
       body: JSON.stringify({ course, groupName, subgroup })
     });

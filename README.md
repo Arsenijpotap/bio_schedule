@@ -93,3 +93,17 @@ Vercel → Project → Settings → Environment Variables
 Enable it for Production, Preview, and Development as needed, then redeploy.
 The database module intentionally does not read `DATABASE_URL` during Next.js build time;
 it creates the Neon client only when an API request executes.
+
+
+## Telegram Mini App auth fix
+
+The app dynamically loads the official Telegram WebApp SDK and waits for
+`Telegram.WebApp.initData` before calling the API. The server accepts the
+init data via `x-telegram-init-data` / `Authorization: tma ...` and validates
+it against `BOT_TOKEN`.
+
+On Vercel, make sure `BOT_TOKEN` is the token of the same bot whose Web App
+button opens this Vercel URL. After changing environment variables, redeploy.
+
+If `/api/auth` returns 401, its JSON now tells whether `BOT_TOKEN` is missing
+or the Telegram init data is invalid.

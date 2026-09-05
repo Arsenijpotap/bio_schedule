@@ -6,8 +6,12 @@ export async function GET(request: Request) {
   const tgUser = getTelegramUserFromRequest(request);
 
   if (!tgUser) {
+    const reason = !process.env.BOT_TOKEN
+      ? "BOT_TOKEN is not configured on Vercel"
+      : "Telegram initData is missing or invalid";
+
     return NextResponse.json(
-      { authenticated: false, user: null },
+      { authenticated: false, user: null, error: reason },
       { status: 401 }
     );
   }

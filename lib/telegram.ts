@@ -59,6 +59,12 @@ export function validateTelegramInitData(initData: string): TelegramUser | null 
 }
 
 export function getTelegramUserFromRequest(request: Request): TelegramUser | null {
-  const initData = request.headers.get("x-telegram-init-data") ?? "";
+  let initData = request.headers.get("x-telegram-init-data") ?? "";
+  if (!initData) {
+    const auth = request.headers.get("authorization") ?? "";
+    if (auth.toLowerCase().startsWith("tma ")) {
+      initData = auth.slice(4);
+    }
+  }
   return validateTelegramInitData(initData);
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import TelegramInit from "@/components/TelegramInit";
+import TelegramInit, { getTelegramInitData } from "@/components/TelegramInit";
 import SetupForm from "@/components/SetupForm";
 import Schedule from "@/components/Schedule";
 import type { UserSettings } from "@/types";
@@ -17,14 +17,22 @@ export default function Home() {
     setError("");
 
     try {
+      const initData = await getTelegramInitData();
       const res = await fetch("/api/auth", {
         headers: {
-          "x-telegram-init-data": window.Telegram?.WebApp?.initData ?? ""
-        }
+          "x-telegram-init-data": initData,
+          "Authorization": initData ? `tma ${initData}` : ""
+        },
+        cache: "no-store"
       });
 
       if (res.status === 401) {
-        setError("Открой приложение через Telegram.");
+        const data = await res.json().catch(() => null);
+        setError(
+          data?.error?.includes("BOT_TOKEN")
+            ? "Сервер не настроен (BOT_TOKEN). Открой приложение через Telegram и проверь настройки."
+            : "Открой приложение через Telegram."
+        );
         return;
       }
 

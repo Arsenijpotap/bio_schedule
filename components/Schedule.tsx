@@ -1,5 +1,6 @@
 "use client";
 
+import { getTelegramInitData } from "@/components/TelegramInit";
 import { useEffect, useMemo, useState } from "react";
 import type { Lesson, UserSettings } from "@/types";
 
@@ -43,10 +44,13 @@ export default function Schedule({
     setError("");
 
     try {
+      const init = await getTelegramInitData();
       const res = await fetch(`/api/schedule?week_date=${dateString(week)}`, {
         headers: {
-          "x-telegram-init-data": window.Telegram?.WebApp?.initData ?? ""
-        }
+          "x-telegram-init-data": init,
+          "Authorization": init ? `tma ${init}` : ""
+        },
+        cache: "no-store"
       });
 
       if (!res.ok) throw new Error();
