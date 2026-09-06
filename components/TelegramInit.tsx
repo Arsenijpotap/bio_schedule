@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { applyTheme, getStoredTheme } from "@/lib/theme";
 
 declare global {
   interface Window {
@@ -19,6 +20,15 @@ declare global {
           };
         };
         colorScheme: "light" | "dark";
+        themeParams: {
+          bg_color?: string;
+          text_color?: string;
+          hint_color?: string;
+          secondary_bg_color?: string;
+          button_color?: string;
+          button_text_color?: string;
+          link_color?: string;
+        };
       };
     };
   }
@@ -32,6 +42,7 @@ export default function TelegramInit() {
     tg.ready();
     tg.expand();
     tg.disableVerticalSwipes?.();
+    applyTheme(getStoredTheme());
   }, []);
 
   return null;
