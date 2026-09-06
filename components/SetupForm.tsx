@@ -16,9 +16,6 @@ export default function SetupForm({ onSaved }: { onSaved: (settings: UserSetting
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  const step = course === null ? "course" : selectedGroup === null ? "group" : "subgroup";
-  const stepIndex = step === "course" ? 0 : step === "group" ? 1 : 2;
-
   async function selectCourse(value: number) {
     setCourse(value);
     setSelectedGroup(null);
@@ -103,48 +100,38 @@ export default function SetupForm({ onSaved }: { onSaved: (settings: UserSetting
     }
   }
 
+  const step = course === null ? "course" : selectedGroup === null ? "group" : "subgroup";
+
   return (
     <main className="app">
-      <div className="container" style={{ paddingTop: 24 }}>
-        <div className="steps">
-          <span className={`step-pill${stepIndex >= 0 ? " fill" : ""}`} />
-          <span className={`step-pill${stepIndex >= 1 ? " fill" : ""}`} />
-          <span className={`step-pill${stepIndex >= 2 ? " fill" : ""}`} />
-        </div>
-
-        <div style={{ marginBottom: 20 }}>
-          <div className="hint" style={{
-            fontSize: 12,
-            fontWeight: 700,
-            letterSpacing: .6,
-            textTransform: "uppercase",
-            marginBottom: 8
-          }}>
+      <div className="container" style={{ paddingTop: 48 }}>
+        <div style={{ marginBottom: 28 }}>
+          <div className="hint" style={{ fontSize: 14, marginBottom: 8 }}>
             БГУ · расписание
           </div>
-          <h1 style={{ fontSize: 28, lineHeight: 1.15, margin: 0, fontWeight: 800 }}>
-            {step === "course" && "Какой курс?"}
+          <h1 style={{ fontSize: 32, lineHeight: 1.1, margin: 0 }}>
+            {step === "course" && "Выбери курс"}
             {step === "group" && "Выбери группу"}
             {step === "subgroup" && "Выбери подгруппу"}
           </h1>
-          <p className="hint" style={{ lineHeight: 1.5, margin: "8px 0 0" }}>
-            {step === "course" && "Сначала укажи курс — покажем группы."}
-            {step === "group" && `Группы ${course} курса.`}
-            {step === "subgroup" && "Подгруппа уточняет расписание именно для тебя."}
+          <p className="hint" style={{ lineHeight: 1.5 }}>
+            {step === "course" && "Укажи курс, чтобы подобрать расписание."}
+            {step === "group" && "Найдены группы твоего курса."}
+            {step === "subgroup" && "Уточни подгруппу — расписание подстроится под неё."}
           </p>
         </div>
 
         {step !== "course" && (
-          <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
-            <span className="chip">{course} курс</span>
-            {selectedGroup && <span className="chip">группа {selectedGroup.number}</span>}
+          <div className="hint" style={{ marginBottom: 14, fontSize: 13 }}>
+            {course} курс
+            {selectedGroup ? ` · группа ${selectedGroup.number}` : ""}
           </div>
         )}
 
         {step === "course" && (
-          <div className="picker-grid cols-2 fade-in">
+          <div className="card" style={{ display: "grid", gap: 10 }}>
             {[1, 2, 3, 4, 5, 6].map(x => (
-              <button key={x} className="pick-btn" onClick={() => selectCourse(x)}>
+              <button key={x} className="primary" onClick={() => selectCourse(x)}>
                 {x} курс
               </button>
             ))}
@@ -152,67 +139,43 @@ export default function SetupForm({ onSaved }: { onSaved: (settings: UserSetting
         )}
 
         {step === "group" && (
-          <div className="picker-grid cols-2 fade-in">
-            {groupsLoading && (
-              <div className="hint" style={{ gridColumn: "1 / -1", padding: 20, textAlign: "center" }}>
-                Загружаем группы…
-              </div>
-            )}
+          <div className="card" style={{ display: "grid", gap: 10 }}>
+            {groupsLoading && <div className="hint" style={{ padding: 16, textAlign: "center" }}>Загружаем группы…</div>}
             {!groupsLoading && groups.length === 0 && !error && (
-              <div className="hint" style={{ gridColumn: "1 / -1", padding: 20, textAlign: "center" }}>
-                Группы не найдены.
-              </div>
+              <div className="hint" style={{ padding: 16, textAlign: "center" }}>Группы не найдены.</div>
             )}
             {!groupsLoading && groups.map(group => (
-              <button key={group.id} className="pick-btn" onClick={() => selectGroup(group)}>
+              <button key={group.id} className="primary" onClick={() => selectGroup(group)}>
                 {group.number}
               </button>
             ))}
-            <button
-              className="secondary"
-              style={{ gridColumn: "1 / -1", marginTop: 4 }}
-              onClick={() => setCourse(null)}
-            >
-              ← Назад
-            </button>
+            <button className="secondary" onClick={() => setCourse(null)}>← Назад</button>
           </div>
         )}
 
         {step === "subgroup" && (
-          <div className="picker-grid fade-in">
-            {subgroupsLoading && (
-              <div className="hint" style={{ padding: 20, textAlign: "center" }}>
-                Загружаем подгруппы…
-              </div>
-            )}
+          <div className="card" style={{ display: "grid", gap: 10 }}>
+            {subgroupsLoading && <div className="hint" style={{ padding: 16, textAlign: "center" }}>Загружаем подгруппы…</div>}
             {!subgroupsLoading && !saving && (
               <>
-                <button className="pick-btn" onClick={() => selectSubgroup("all")}>
+                <button className="primary" onClick={() => selectSubgroup("all")}>
                   Вся группа
                 </button>
                 {subgroups.map(sub => (
-                  <button key={sub} className="pick-btn" onClick={() => selectSubgroup(sub as Subgroup)}>
+                  <button key={sub} className="primary" onClick={() => selectSubgroup(sub as Subgroup)}>
                     {sub} подгруппа
                   </button>
                 ))}
-                <button
-                  className="secondary"
-                  style={{ marginTop: 4 }}
-                  onClick={() => { setSelectedGroup(null); setSubgroups([]); }}
-                >
+                <button className="secondary" onClick={() => { setSelectedGroup(null); setSubgroups([]); }}>
                   ← Назад
                 </button>
               </>
             )}
-            {saving && <div className="hint" style={{ padding: 20, textAlign: "center" }}>Сохраняем…</div>}
+            {saving && <div className="hint" style={{ padding: 16, textAlign: "center" }}>Сохраняем…</div>}
           </div>
         )}
 
-        {error && (
-          <div style={{ color: "#ef4444", marginTop: 16, textAlign: "center", fontWeight: 600 }}>
-            {error}
-          </div>
-        )}
+        {error && <div style={{ color: "#ef4444", marginTop: 14 }}>{error}</div>}
       </div>
     </main>
   );

@@ -64,9 +64,8 @@ export default function Home() {
 
       {mode === "loading" && (
         <main className="app">
-          <div className="container" style={{ paddingTop: 160, textAlign: "center" }}>
-            <div className="spinner" />
-            <div className="hint" style={{ marginTop: 14 }}>Загружаем…</div>
+          <div className="container" style={{ paddingTop: 100, textAlign: "center" }}>
+            Загрузка…
           </div>
         </main>
       )}
