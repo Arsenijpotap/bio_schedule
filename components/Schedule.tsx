@@ -64,10 +64,10 @@ function lessonKind(type?: string) {
 }
 
 function kindColor(kind: string) {
-  if (kind === "lecture") return "#2481cc";
-  if (kind === "practice") return "#22a06b";
-  if (kind === "lab") return "#8b5cf6";
-  return "#9aa4ad";
+  if (kind === "lecture") return "var(--accent-lecture)";
+  if (kind === "practice") return "var(--accent-practice)";
+  if (kind === "lab") return "var(--accent-lab)";
+  return "var(--accent-other)";
 }
 
 function parseTime(time: string) {
@@ -172,17 +172,12 @@ export default function Schedule({
 
   return (
     <main className="app">
-      <header style={{
-        position: "sticky", top: 0, zIndex: 5,
-        background: "color-mix(in srgb, var(--tg-bg) 92%, transparent)",
-        backdropFilter: "blur(14px)",
-        borderBottom: "1px solid var(--tg-secondary)"
-      }}>
-        <div className="container" style={{ paddingTop: 14, paddingBottom: 14 }}>
+      <header className="app-header">
+        <div className="container" style={{ paddingTop: 14, paddingBottom: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 21 }}>Расписание</div>
-              <div className="hint" style={{ fontSize: 13 }}>
+              <div style={{ fontWeight: 800, fontSize: 20, letterSpacing: .2 }}>Расписание</div>
+              <div className="hint" style={{ fontSize: 13, marginTop: 2 }}>
                 {settings.course} курс · {settings.groupName}
                 {settings.subgroup !== "all" ? ` · ${settings.subgroup} подгруппа` : ""}
               </div>
@@ -195,31 +190,22 @@ export default function Schedule({
             </button>
           </div>
 
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "48px 1fr 48px",
-            gap: 8, alignItems: "center", marginTop: 14
-          }}>
-            <button className="secondary" onClick={() => moveWeek(-7)}>←</button>
-            <div style={{ textAlign: "center", fontWeight: 700, fontSize: 14 }}>
-              {formatWeekRange(week)}
-            </div>
-            <button className="secondary" onClick={() => moveWeek(7)}>→</button>
+          <div className="week-nav">
+            <button className="week-btn" onClick={() => moveWeek(-7)} aria-label="Предыдущая неделя">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+            <div className="week-range">{formatWeekRange(week)}</div>
+            <button className="week-btn" onClick={() => moveWeek(7)} aria-label="Следующая неделя">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
           </div>
 
           {!isCurrentWeek && (
-            <button
-              className="secondary"
-              style={{
-                marginTop: 10,
-                width: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 8
-              }}
-              onClick={() => setWeek(currentWeekMonday())}
-            >
+            <button className="secondary back-current" onClick={() => setWeek(currentWeekMonday())}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="23 4 23 10 17 10" />
                 <polyline points="1 20 1 14 7 14" />
@@ -232,18 +218,25 @@ export default function Schedule({
       </header>
 
       <section className="container">
-        {loading && <div className="hint" style={{ padding: 48, textAlign: "center" }}>Загружаем…</div>}
+        {loading && (
+          <div style={{ padding: 60, textAlign: "center" }}>
+            <div className="spinner" />
+          </div>
+        )}
 
         {!loading && error && (
-          <div className="card" style={{ color: "#ef4444", textAlign: "center" }}>{error}</div>
+          <div className="card" style={{ color: "#ef4444", textAlign: "center", fontWeight: 600 }}>
+            {error}
+          </div>
         )}
 
         {!loading && !error && !lessons.length && (
-          <div className="card" style={{ textAlign: "center" }}>
+          <div className="card empty-state fade-in">
+            <div className="icon">📅</div>
             <b>{weekEmpty ? "Расписание на эту неделю пока не добавлено" : "Занятий нет"}</b>
             <div className="hint" style={{ marginTop: 6 }}>
               {weekEmpty
-                ? "Попробуй заглянуть позже или выбрать другую неделю."
+                ? "Загляни позже или выбери другую неделю."
                 : "Для этой недели ничего не найдено."}
             </div>
           </div>
@@ -253,16 +246,17 @@ export default function Schedule({
           <div
             key={day}
             id={`day-${day}`}
-            style={{ marginBottom: 18, scrollMarginTop: 130 }}
+            style={{ marginBottom: 14, scrollMarginTop: 120 }}
           >
-            <h2 style={{ fontSize: 15, margin: "10px 4px", display: "flex", alignItems: "center", gap: 8 }}>
-              {day}
+            <div className={`day-heading${isCurrentWeek && day === todayName ? " today" : ""}`}>
+              <span className="bar" />
+              <span>{day}</span>
               {isCurrentWeek && day === todayName && (
                 <span className="today-badge">Сегодня</span>
               )}
-            </h2>
+            </div>
 
-            <div style={{ display: "grid", gap: 9 }}>
+            <div style={{ display: "grid", gap: 10 }}>
               {items.map(lesson => {
                 const dayIndex = WEEKDAY_NAMES.indexOf(lesson.weekday);
                 const kind = lessonKind(lesson.type);
@@ -272,60 +266,50 @@ export default function Schedule({
                 const [timeStart, timeEnd] = lesson.time
                   .split(/[–-]/)
                   .map(part => part.trim());
+                const isDefaultAddress = lesson.address &&
+                  lesson.address.trim().toLowerCase() === "курчатова 10";
+                const address = lesson.address && !isDefaultAddress ? lesson.address.trim() : "";
 
                 return (
                   <article
                     key={lesson.id}
-                    className={`card lesson-card lesson-${kind}${current ? " lesson-current" : ""}`}
-                    style={{ position: "relative", overflow: "hidden" }}
+                    className={`lesson-card lesson-${kind}${current ? " lesson-current" : ""} fade-in`}
                   >
                     <div
                       className="lesson-progress"
-                      style={{
-                        background: color,
-                        width: `${Math.round(fill * 100)}%`
-                      }}
+                      style={{ background: color, width: `${Math.round(fill * 100)}%` }}
                     />
-                    <div style={{ display: "grid", gridTemplateColumns: "70px 1fr", gap: 14 }}>
-                      <div>
-                        <b>{timeStart}</b>
-                        {timeEnd && <div className="hint" style={{ fontSize: 12, marginTop: 2 }}>{timeEnd}</div>}
-                        {lesson.room && <div className="hint" style={{ fontSize: 12, marginTop: 5 }}>ауд. {lesson.room}</div>}
-                      </div>
 
-                      <div>
-                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                          <div style={{ fontWeight: 750 }}>{lesson.subject}</div>
-                          {current && <span className="current-badge">Сейчас</span>}
-                        </div>
-                        {lesson.type && (
-                          <div className={`hint lesson-type-${kind}`} style={{ marginTop: 4, fontSize: 13, fontWeight: 600 }}>
-                            {lesson.type}
-                          </div>
-                        )}
-                        {lesson.teacher && <div style={{ marginTop: 5, fontSize: 14 }}>{lesson.teacher}</div>}
-                        {(() => {
-                          const isDefault = lesson.address &&
-                            lesson.address.trim().toLowerCase() === "курчатова 10";
-                          const address = lesson.address && !isDefault ? lesson.address.trim() : "";
-                          if (!address && !lesson.comment) return null;
-                          return (
-                            <div className="hint" style={{ marginTop: 5, fontSize: 12 }}>
-                              {address && <span>{address}</span>}
-                              {address && lesson.comment ? " · " : ""}
-                              {lesson.comment || ""}
-                            </div>
-                          );
-                        })()}
-                        {(lesson.group || lesson.subgroup) && (
-                          <div className="hint" style={{ marginTop: 5, fontSize: 12 }}>
-                            {lesson.group && `гр. ${lesson.group}`}
-                            {lesson.subgroup && lesson.subgroup !== "all"
-                              ? `${lesson.group ? " · " : ""}${lesson.subgroup} подгруппа`
-                              : ""}
-                          </div>
-                        )}
+                    <div className="lesson-time">
+                      <span className="start">{timeStart}</span>
+                      {timeEnd && <span className="end">{timeEnd}</span>}
+                      {lesson.room && <span className="room">ауд. {lesson.room}</span>}
+                    </div>
+
+                    <div>
+                      <div className="lesson-top">
+                        <span className="lesson-subject">{lesson.subject}</span>
+                        {current && <span className="current-badge">Сейчас</span>}
                       </div>
+                      {lesson.type && (
+                        <span className={`type-badge type-badge-${kind}`}>{lesson.type}</span>
+                      )}
+                      {lesson.teacher && <div className="lesson-meta">{lesson.teacher}</div>}
+                      {(address || lesson.comment) && (
+                        <div className="lesson-hint">
+                          {address}
+                          {address && lesson.comment ? " · " : ""}
+                          {lesson.comment || ""}
+                        </div>
+                      )}
+                      {(lesson.group || lesson.subgroup) && (
+                        <div className="lesson-hint">
+                          {lesson.group && `гр. ${lesson.group}`}
+                          {lesson.subgroup && lesson.subgroup !== "all"
+                            ? `${lesson.group ? " · " : ""}${lesson.subgroup} подгруппа`
+                            : ""}
+                        </div>
+                      )}
                     </div>
                   </article>
                 );
