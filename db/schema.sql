@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
   last_name TEXT,
   course INTEGER NOT NULL CHECK (course BETWEEN 1 AND 6),
   group_name TEXT NOT NULL,
-  subgroup TEXT NOT NULL DEFAULT 'all' CHECK (subgroup IN ('all', '1', '2')),
+  subgroup TEXT NOT NULL DEFAULT 'all' CHECK (subgroup IN ('all', '1', '2', '3')),
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -24,3 +24,9 @@ CREATE TABLE IF NOT EXISTS schedule_cache (
 
 CREATE INDEX IF NOT EXISTS schedule_cache_lookup_idx
   ON schedule_cache(course, week_date);
+
+CREATE TABLE IF NOT EXISTS groups_cache (
+  course INTEGER PRIMARY KEY,
+  data JSONB NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);

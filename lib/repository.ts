@@ -72,3 +72,23 @@ export async function saveCachedSchedule(
       created_at = NOW()
   `;
 }
+
+export async function getCachedGroups(course: number) {
+  const sql = getDb();
+  const rows = await sql`
+    SELECT data FROM groups_cache WHERE course = ${course} LIMIT 1
+  `;
+  return rows[0]?.data ?? null;
+}
+
+export async function saveCachedGroups(course: number, data: unknown) {
+  const sql = getDb();
+  await sql`
+    INSERT INTO groups_cache(course, data)
+    VALUES (${course}, ${JSON.stringify(data)})
+    ON CONFLICT (course)
+    DO UPDATE SET
+      data = EXCLUDED.data,
+      updated_at = NOW()
+  `;
+}

@@ -1,4 +1,4 @@
-export type Subgroup = "all" | "1" | "2";
+export type Subgroup = "all" | "1" | "2" | "3";
 
 export type UserSettings = {
   course: number;
@@ -15,6 +15,8 @@ export type Lesson = {
   type?: string;
   teacher?: string;
   room?: string;
+  address?: string;
+  comment?: string;
   group?: string;
   subgroup?: string;
 };

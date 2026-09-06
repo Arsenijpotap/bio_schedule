@@ -22,13 +22,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid group" }, { status: 400 });
   }
 
-  if (!["all", "1", "2"].includes(subgroup)) {
+  if (!["all", "1", "2", "3"].includes(subgroup)) {
     return NextResponse.json({ error: "Invalid subgroup" }, { status: 400 });
   }
 
   const user = await upsertUser(
     String(tgUser.id),
-    { course, groupName, subgroup: subgroup as "all" | "1" | "2" },
+    { course, groupName, subgroup: subgroup as "all" | "1" | "2" | "3" },
     tgUser
   );
 

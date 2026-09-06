@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getTelegramUserFromRequest } from "@/lib/telegram";
-import { fetchSchedule } from "@/lib/source";
+import { fetchGroups } from "@/lib/source";
+import { getCachedGroups, saveCachedGroups } from "@/lib/repository";
 
 export async function GET(request: Request) {
   const tgUser = getTelegramUserFromRequest(request);
@@ -8,11 +9,14 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const course = Number(url.searchParams.get("course") ?? "1");
-  const weekDate = url.searchParams.get("week_date") ?? new Date().toISOString().slice(0, 10);
 
   try {
-    const data = await fetchSchedule(course, weekDate);
-    const groups = [...new Set(data.lessons.map(x => x.group).filter(Boolean))].sort();
+    let groups = await getCachedGroups(course);
+
+    if (!groups) {
+      groups = await fetchGroups(course);
+      await saveCachedGroups(course, groups);
+    }
 
     return NextResponse.json({ groups });
   } catch {
