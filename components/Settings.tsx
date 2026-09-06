@@ -182,7 +182,14 @@ export default function Settings({
           <div className="card" style={{ textAlign: "center", padding: 24 }}>
             <div style={{ fontWeight: 800, fontSize: 18 }}>Расписание БГУ</div>
             <div className="hint" style={{ marginTop: 6 }}>Версия 1.0.0</div>
-            <div className="hint" style={{ marginTop: 2 }}>Данные: сайт БГУ</div>
+            <div style={{ marginTop: 18 }}>
+              <div className="hint">Источник расписания</div>
+              <a className="link" href="https://bio.bsu.by/schedule/" target="_blank" rel="noopener noreferrer">bio.bsu.by/schedule</a>
+            </div>
+            <div style={{ marginTop: 18 }}>
+              <div className="hint">Нашли неточность или есть идея? Напишите нам в Telegram</div>
+              <a className="link" href="https://t.me/seniaalx" target="_blank" rel="noopener noreferrer">@seniaalx</a>
+            </div>
           </div>
         )}
       </section>
