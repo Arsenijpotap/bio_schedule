@@ -212,7 +212,7 @@ export default function SetupForm({ onSaved }: { onSaved: (settings: UserSetting
 
         {lastUpdate && (
           <div className="hint" style={{ marginTop: 24, textAlign: "center", fontSize: 12 }}>
-            Последнее обновление расписания: {lastUpdate}
+            Последнее обновление расписания: {formatLastUpdate(lastUpdate)}
           </div>
         )}
       </div>
