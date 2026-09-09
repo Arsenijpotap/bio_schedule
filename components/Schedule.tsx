@@ -97,6 +97,26 @@ function lessonProgress(time: string, dayIndex: number, weekStart: Date) {
   return (nowMinutes - parsed.start) / (parsed.end - parsed.start);
 }
 
+const KIND_COLORS: Record<string, string> = {
+  lecture: "#2481cc",
+  practice: "#22a06b",
+  lab: "#8b5cf6",
+  other: "#9aa4ad"
+};
+
+function formatLastUpdate(value: string | null) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+
+  return `${day}.${month}.${d.getFullYear()} в ${hours}:${minutes}`;
+}
+
 export default function Schedule({
   settings,
   onChange
@@ -109,6 +129,7 @@ export default function Schedule({
   const [weekEmpty, setWeekEmpty] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
 
   const currentMonday = currentWeekMonday();
   const isCurrentWeek = dateString(week) === dateString(currentMonday);
@@ -143,6 +164,25 @@ export default function Schedule({
   }
 
   useEffect(() => { load(); }, [week]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const init = await getTelegramInitData();
+        const res = await fetch("/api/status", {
+          headers: {
+            "x-telegram-init-data": init,
+            "Authorization": init ? `tma ${init}` : ""
+          }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setLastUpdate(data.lastUpdated ?? null);
+      } catch {
+        // не критично для расписания
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     if (!loading && isCurrentWeek && todayName) {
@@ -272,7 +312,7 @@ export default function Schedule({
                     style={{
                       position: "relative",
                       overflow: "hidden",
-                      background: `color-mix(in srgb, var(--tg-card) ${Math.round(100 - fill * 14)}%, rgb(0 0 0))`
+                      background: `linear-gradient(90deg, color-mix(in srgb, ${KIND_COLORS[kind]} 16%, var(--tg-card)) ${Math.round(fill * 100)}%, var(--tg-card) ${Math.round(fill * 100)}%)`
                     }}
                   >
                     <div style={{ display: "grid", gridTemplateColumns: "70px 1fr", gap: 14 }}>
@@ -323,6 +363,14 @@ export default function Schedule({
           </div>
         ))}
       </section>
+
+      {lastUpdate && (
+        <footer className="container">
+          <div className="hint" style={{ textAlign: "center", fontSize: 12, padding: "8px 0 24px" }}>
+            Последнее обновление расписания: {formatLastUpdate(lastUpdate)}
+          </div>
+        </footer>
+      )}
     </main>
   );
 
