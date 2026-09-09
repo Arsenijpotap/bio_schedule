@@ -98,10 +98,10 @@ function lessonProgress(time: string, dayIndex: number, weekStart: Date) {
 }
 
 const KIND_COLORS: Record<string, string> = {
-  lecture: "#2481cc",
-  practice: "#22a06b",
-  lab: "#8b5cf6",
-  other: "#9aa4ad"
+  lecture: "var(--acc-lecture)",
+  practice: "var(--acc-practice)",
+  lab: "var(--acc-lab)",
+  other: "var(--acc-other)"
 };
 
 function formatLastUpdate(value: string | null) {
