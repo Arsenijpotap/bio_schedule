@@ -4,12 +4,18 @@ import { useEffect, useState } from "react";
 import TelegramInit, { getTelegramInitData } from "@/components/TelegramInit";
 import SetupForm from "@/components/SetupForm";
 import Schedule from "@/components/Schedule";
+import Settings from "@/components/Settings";
+import { applyTheme, getStoredTheme } from "@/lib/theme";
 import type { UserSettings } from "@/types";
 
 export default function Home() {
   const [settings, setSettings] = useState<UserSettings | null>(null);
-  const [mode, setMode] = useState<"loading" | "setup" | "schedule">("loading");
+  const [mode, setMode] = useState<"loading" | "setup" | "schedule" | "settings">("loading");
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    applyTheme(getStoredTheme());
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -63,20 +69,31 @@ export default function Home() {
       <TelegramInit />
 
       {mode === "loading" && (
-        <main className="app">
-          <div className="container" style={{ paddingTop: 100, textAlign: "center" }}>
+        <main className="app" id="main">
+          <div className="container" style={{ paddingTop: 100, textAlign: "center" }} aria-live="polite">
             Загрузка…
           </div>
         </main>
       )}
 
       {mode === "schedule" && settings && (
-        <Schedule settings={settings} onChange={() => setMode("setup")} />
+        <Schedule settings={settings} onChange={() => setMode("settings")} />
+      )}
+
+      {mode === "settings" && settings && (
+        <Settings
+          settings={settings}
+          onClose={() => setMode("schedule")}
+          onSaved={(saved) => {
+            setSettings(saved);
+            setMode("schedule");
+          }}
+        />
       )}
 
       {mode === "setup" && (error
         ? (
-          <main className="app">
+          <main className="app" id="main">
             <div className="container" style={{ paddingTop: 100 }}>
               <div className="card" style={{ textAlign: "center" }}>
                 <b>{error}</b>

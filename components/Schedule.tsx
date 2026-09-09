@@ -109,12 +109,13 @@ function formatLastUpdate(value: string | null) {
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return null;
 
-  const day = String(d.getDate()).padStart(2, "0");
-  const month = String(d.getMonth() + 1).padStart(2, "0");
-  const hours = String(d.getHours()).padStart(2, "0");
-  const minutes = String(d.getMinutes()).padStart(2, "0");
-
-  return `${day}.${month}.${d.getFullYear()} в ${hours}:${minutes}`;
+  return new Intl.DateTimeFormat("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit"
+  }).format(d);
 }
 
 export default function Schedule({
@@ -157,7 +158,7 @@ export default function Schedule({
       setLessons(data.lessons ?? []);
       setWeekEmpty(Boolean(data.weekEmpty));
     } catch {
-      setError("Не удалось загрузить расписание.");
+      setError("Не удалось загрузить расписание. Обнови страницу и попробуй ещё раз.");
     } finally {
       setLoading(false);
     }
@@ -186,8 +187,9 @@ export default function Schedule({
 
   useEffect(() => {
     if (!loading && isCurrentWeek && todayName) {
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
       document.getElementById(`day-${todayName}`)?.scrollIntoView({
-        behavior: "smooth",
+        behavior: reduced ? "auto" : "smooth",
         block: "start"
       });
     }
@@ -204,7 +206,7 @@ export default function Schedule({
   }, [lessons]);
 
   return (
-    <main className="app">
+    <main className="app" id="main">
       <header style={{
         position: "sticky", top: 0, zIndex: 5,
         background: "color-mix(in srgb, var(--tg-bg) 92%, transparent)",
@@ -214,14 +216,14 @@ export default function Schedule({
         <div className="container" style={{ paddingTop: 14, paddingBottom: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
             <div>
-              <div style={{ fontWeight: 800, fontSize: 21 }}>Расписание</div>
+              <h1 style={{ fontWeight: 800, fontSize: 21, margin: 0 }}>Расписание</h1>
               <div className="hint" style={{ fontSize: 13 }}>
                 {settings.course} курс · {settings.groupName}
                 {settings.subgroup !== "all" ? ` · ${settings.subgroup} подгруппа` : ""}
               </div>
             </div>
             <button className="icon-btn" onClick={onChange} aria-label="Настройки" title="Настройки">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <circle cx="12" cy="12" r="3" />
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.01a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.01a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.01a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
               </svg>
@@ -253,7 +255,7 @@ export default function Schedule({
               }}
               onClick={() => setWeek(currentWeekMonday())}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <polyline points="23 4 23 10 17 10" />
                 <polyline points="1 20 1 14 7 14" />
                 <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
@@ -265,10 +267,10 @@ export default function Schedule({
       </header>
 
       <section className="container">
-        {loading && <div className="hint" style={{ padding: 48, textAlign: "center" }}>Загружаем…</div>}
+        {loading && <div className="hint" style={{ padding: 48, textAlign: "center" }} aria-live="polite">Загружаем…</div>}
 
         {!loading && error && (
-          <div className="card" style={{ color: "#ef4444", textAlign: "center" }}>{error}</div>
+          <div className="card" style={{ color: "#ef4444", textAlign: "center" }} aria-live="polite">{error}</div>
         )}
 
         {!loading && !error && !lessons.length && (
@@ -322,9 +324,9 @@ export default function Schedule({
                         {lesson.room && <div className="hint" style={{ fontSize: 12, marginTop: 5 }}>ауд. {lesson.room}</div>}
                       </div>
 
-                      <div>
+                      <div style={{ minWidth: 0 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
-                          <div style={{ fontWeight: 750 }}>{lesson.subject}</div>
+                          <div style={{ fontWeight: 750, minWidth: 0, overflowWrap: "anywhere", wordBreak: "break-word" }}>{lesson.subject}</div>
                           {current && <span className="current-badge">Сейчас</span>}
                         </div>
                         {lesson.type && (
@@ -332,14 +334,14 @@ export default function Schedule({
                             {lesson.type}
                           </div>
                         )}
-                        {lesson.teacher && <div style={{ marginTop: 5, fontSize: 14 }}>{lesson.teacher}</div>}
+                        {lesson.teacher && <div style={{ marginTop: 5, fontSize: 14, overflowWrap: "anywhere", wordBreak: "break-word" }}>{lesson.teacher}</div>}
                         {(() => {
                           const isDefault = lesson.address &&
                             lesson.address.trim().toLowerCase() === "курчатова 10";
                           const address = lesson.address && !isDefault ? lesson.address.trim() : "";
                           if (!address && !lesson.comment) return null;
                           return (
-                            <div className="hint" style={{ marginTop: 5, fontSize: 12 }}>
+                            <div className="hint" style={{ marginTop: 5, fontSize: 12, overflowWrap: "anywhere", wordBreak: "break-word" }}>
                               {address && <span>{address}</span>}
                               {address && lesson.comment ? " · " : ""}
                               {lesson.comment || ""}
@@ -347,7 +349,7 @@ export default function Schedule({
                           );
                         })()}
                         {(lesson.group || lesson.subgroup) && (
-                          <div className="hint" style={{ marginTop: 5, fontSize: 12 }}>
+                          <div className="hint" style={{ marginTop: 5, fontSize: 12, overflowWrap: "anywhere", wordBreak: "break-word" }}>
                             {lesson.group && `гр. ${lesson.group}`}
                             {lesson.subgroup && lesson.subgroup !== "all"
                               ? `${lesson.group ? " · " : ""}${lesson.subgroup} подгруппа`

@@ -1,6 +1,7 @@
 * { box-sizing: border-box; }
 
 :root {
+  color-scheme: light;
   --tg-bg: #ffffff;
   --tg-text: #111111;
   --tg-hint: #7d7d83;
@@ -20,7 +21,11 @@ html, body {
 }
 
 button, input, select { font: inherit; }
-button { cursor: pointer; }
+button {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
 
 .app {
   min-height: 100vh;
@@ -49,8 +54,28 @@ button { cursor: pointer; }
   outline: none;
 }
 
-.input:focus, .select:focus {
+.input:focus-visible, .select:focus-visible {
   box-shadow: 0 0 0 2px var(--tg-button);
+}
+
+.primary:focus-visible, .secondary:focus-visible, .icon-btn:focus-visible {
+  outline: 2px solid var(--tg-button);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 10;
+  background: var(--tg-button);
+  color: var(--tg-button-text);
+  padding: 10px 14px;
+  border-radius: 0 0 12px 0;
+  font-weight: 700;
+}
+.skip-link:focus-visible {
+  left: 0;
 }
 
 .primary {
@@ -125,6 +150,7 @@ button { cursor: pointer; }
 
 @media (prefers-color-scheme: dark) {
   :root {
+    color-scheme: dark;
     --tg-bg: #18222d;
     --tg-text: #ffffff;
     --tg-hint: #9aa4ad;
@@ -134,4 +160,28 @@ button { cursor: pointer; }
     --tg-link: #64b5ef;
     --tg-card: #202f3d;
   }
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --tg-bg: #ffffff;
+  --tg-text: #111111;
+  --tg-hint: #7d7d83;
+  --tg-secondary: #f0f0f2;
+  --tg-button: #2481cc;
+  --tg-button-text: #ffffff;
+  --tg-link: #2481cc;
+  --tg-card: #f6f6f8;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --tg-bg: #18222d;
+  --tg-text: #ffffff;
+  --tg-hint: #9aa4ad;
+  --tg-secondary: #22303d;
+  --tg-button: #2aabee;
+  --tg-button-text: #ffffff;
+  --tg-link: #64b5ef;
+  --tg-card: #202f3d;
 }
