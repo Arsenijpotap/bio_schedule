@@ -63,13 +63,6 @@ function lessonKind(type?: string) {
   return "other";
 }
 
-function kindColor(kind: string) {
-  if (kind === "lecture") return "#2481cc";
-  if (kind === "practice") return "#22a06b";
-  if (kind === "lab") return "#8b5cf6";
-  return "#9aa4ad";
-}
-
 function parseTime(time: string) {
   const match = time.match(/^(\d{1,2}):(\d{2})[–-](\d{1,2}):(\d{2})/);
   if (!match) return null;
@@ -268,7 +261,6 @@ export default function Schedule({
                 const kind = lessonKind(lesson.type);
                 const fill = lessonProgress(lesson.time, dayIndex, week);
                 const current = fill > 0 && fill < 1;
-                const color = kindColor(kind);
                 const [timeStart, timeEnd] = lesson.time
                   .split(/[–-]/)
                   .map(part => part.trim());
@@ -276,16 +268,13 @@ export default function Schedule({
                 return (
                   <article
                     key={lesson.id}
-                    className={`card lesson-card lesson-${kind}${current ? " lesson-current" : ""}`}
-                    style={{ position: "relative", overflow: "hidden" }}
+                    className={`card lesson-card lesson-${kind}`}
+                    style={{
+                      position: "relative",
+                      overflow: "hidden",
+                      background: `color-mix(in srgb, var(--tg-card) ${Math.round(100 - fill * 14)}%, rgb(0 0 0))`
+                    }}
                   >
-                    <div
-                      className="lesson-progress"
-                      style={{
-                        background: color,
-                        width: `${Math.round(fill * 100)}%`
-                      }}
-                    />
                     <div style={{ display: "grid", gridTemplateColumns: "70px 1fr", gap: 14 }}>
                       <div>
                         <b>{timeStart}</b>

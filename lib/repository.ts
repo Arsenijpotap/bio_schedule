@@ -92,3 +92,11 @@ export async function saveCachedGroups(course: number, data: unknown) {
       updated_at = NOW()
   `;
 }
+
+export async function getLastUpdated() {
+  const sql = getDb();
+  const rows = await sql`
+    SELECT MAX(created_at) AS last_updated FROM schedule_cache
+  `;
+  return rows[0]?.last_updated ?? null;
+}

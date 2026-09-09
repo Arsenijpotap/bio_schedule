@@ -85,23 +85,9 @@ button { cursor: pointer; }
 .lesson-card.lesson-lab { border-left-color: #8b5cf6; }
 .lesson-card.lesson-other { border-left-color: #9aa4ad; }
 
-.lesson-progress {
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  height: 3px;
-  border-radius: 0 3px 0 0;
-  will-change: width;
-}
-
 .lesson-type-lecture { color: #2481cc !important; }
 .lesson-type-practice { color: #22a06b !important; }
 .lesson-type-lab { color: #8b5cf6 !important; }
-
-.lesson-card.lesson-current {
-  box-shadow: inset 0 0 0 2px var(--tg-button);
-  background: color-mix(in srgb, var(--tg-button) 8%, var(--tg-card));
-}
 
 .icon-btn {
   border: 0;

@@ -1,10 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getTelegramInitData } from "@/components/TelegramInit";
 import type { Subgroup, UserSettings } from "@/types";
 
 type GroupOption = { id: number; number: string; name: string };
+
+function formatLastUpdate(value: string | null) {
+  if (!value) return null;
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return null;
+
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+
+  return `${day}.${month}.${d.getFullYear()} в ${hours}:${minutes}`;
+}
 
 export default function SetupForm({ onSaved }: { onSaved: (settings: UserSettings) => void }) {
   const [course, setCourse] = useState<number | null>(null);
@@ -15,6 +28,26 @@ export default function SetupForm({ onSaved }: { onSaved: (settings: UserSetting
   const [subgroupsLoading, setSubgroupsLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [lastUpdate, setLastUpdate] = useState<string | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const init = await getTelegramInitData();
+        const res = await fetch("/api/status", {
+          headers: {
+            "x-telegram-init-data": init,
+            "Authorization": init ? `tma ${init}` : ""
+          }
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        setLastUpdate(data.lastUpdated ?? null);
+      } catch {
+        // не критично для настроек
+      }
+    })();
+  }, []);
 
   async function selectCourse(value: number) {
     setCourse(value);
@@ -176,6 +209,12 @@ export default function SetupForm({ onSaved }: { onSaved: (settings: UserSetting
         )}
 
         {error && <div style={{ color: "#ef4444", marginTop: 14 }}>{error}</div>}
+
+        {lastUpdate && (
+          <div className="hint" style={{ marginTop: 24, textAlign: "center", fontSize: 12 }}>
+            Последнее обновление расписания: {lastUpdate}
+          </div>
+        )}
       </div>
     </main>
   );
